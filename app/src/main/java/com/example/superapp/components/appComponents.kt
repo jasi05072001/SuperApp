@@ -1,6 +1,8 @@
 package com.example.superapp.components
 
+import android.util.Log
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -8,6 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -36,6 +39,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -63,6 +67,13 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.animateLottieCompositionAsState
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.superapp.R
 import com.example.superapp.ui.theme.focusedTextFieldText
 import com.example.superapp.ui.theme.unfocusedTextFieldText
@@ -115,7 +126,12 @@ fun HeadingTextComponent(value:String) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TextFieldComponent(labelValue :String, icon: ImageVector, isEmail :Boolean = false) {
+fun TextFieldComponent(
+    labelValue :String,
+    icon: ImageVector,
+    isEmail :Boolean = false,
+    onTextSelected: (String) -> Unit
+) {
 
     val uiColor = if (isSystemInDarkTheme()) Color.White else Color.Black
 
@@ -128,7 +144,10 @@ fun TextFieldComponent(labelValue :String, icon: ImageVector, isEmail :Boolean =
         modifier = Modifier
             .fillMaxWidth(),
         value = textValue.value,
-        onValueChange = { textValue.value = it },
+        onValueChange = {
+            textValue.value = it
+            onTextSelected(it)
+        },
         singleLine = true,
         maxLines = 1,
         label = {
@@ -166,7 +185,7 @@ fun TextFieldComponent(labelValue :String, icon: ImageVector, isEmail :Boolean =
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PasswordFieldComponent(labelValue :String, icon: ImageVector) {
+fun PasswordFieldComponent(labelValue :String, icon: ImageVector, onTextSelected: (String) -> Unit) {
 
     val uiColor = if (isSystemInDarkTheme()) Color.White else Color.Black
 
@@ -183,7 +202,10 @@ fun PasswordFieldComponent(labelValue :String, icon: ImageVector) {
         modifier = Modifier
             .fillMaxWidth(),
         value = password.value,
-        onValueChange = { password.value = it },
+        onValueChange = {
+            password.value = it
+            onTextSelected(it)
+        },
         singleLine = true,
         maxLines = 1,
         label = {
@@ -252,7 +274,10 @@ fun PasswordFieldComponent(labelValue :String, icon: ImageVector) {
 }
 
 @Composable
-fun CheckBoxComponent(onTextSelected: (String) -> Unit ) {
+fun CheckBoxComponent(
+    onTextSelected: (String) -> Unit,
+    onCheckedChange: (Boolean) -> Unit
+) {
 
     val checkBoxState = remember {
         mutableStateOf(false)
@@ -269,7 +294,11 @@ fun CheckBoxComponent(onTextSelected: (String) -> Unit ) {
     ) {
         Checkbox(
             checked  = checkBoxState.value,
-            onCheckedChange = { checkBoxState.value = it },
+            onCheckedChange = {
+                checkBoxState.value = it
+                onCheckedChange(it)
+                Log.d("Checked", "CheckBoxComponent: $it")
+            },
             colors = CheckboxDefaults.colors(
                 checkmarkColor = uiColor,
                 checkedColor = uiColor2,
@@ -386,7 +415,7 @@ fun CircleAvatar(
 fun ButtonComponent(
     value: String,
     onClick: () -> Unit,
-    isEnabled : Boolean = true
+    isEnabled : Boolean = false
 ) {
     val buttonColor =
         if (isSystemInDarkTheme())
@@ -560,6 +589,49 @@ fun UnderLinedClickableTextComponent(value: String,onClick: () -> Unit) {
     }
 }
 
+
+@Composable
+fun LoaderComponent() {
+
+    val composition by rememberLottieComposition(
+        LottieCompositionSpec
+            .RawRes(R.raw.loader2)
+    )
+
+    val progress by animateLottieCompositionAsState(
+        composition,
+        iterations = LottieConstants.IterateForever,
+        isPlaying = true,
+        speed = 1f,
+        restartOnPlay = false
+
+    )
+    Dialog(
+        onDismissRequest = {},
+        properties = DialogProperties(
+            dismissOnBackPress = false,
+            dismissOnClickOutside = false
+        )
+    ) {
+        Box(
+            modifier = Modifier
+                .size(120.dp)
+                .background(Color.White, shape = RoundedCornerShape(8.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            LottieAnimation(
+                composition = composition,
+                progress = progress,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.FillBounds
+
+            )
+        }
+        
+    }
+
+
+}
 
 
 

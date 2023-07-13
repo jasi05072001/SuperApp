@@ -30,23 +30,27 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.superapp.R
 import com.example.superapp.components.AlreadyHaveAccountComponent
 import com.example.superapp.components.ButtonComponent
 import com.example.superapp.components.DividerTextComponent
 import com.example.superapp.components.HeadingTextComponent
+import com.example.superapp.components.LoaderComponent
 import com.example.superapp.components.NormalTextComponent
 import com.example.superapp.components.OtherLoginOptionsComponent
 import com.example.superapp.components.PasswordFieldComponent
 import com.example.superapp.components.TextFieldComponent
 import com.example.superapp.components.UnderLinedClickableTextComponent
+import com.example.superapp.data.LoginUiEvent
+import com.example.superapp.data.LoginViewModel
 import com.example.superapp.navigation.AppRouter
 import com.example.superapp.navigation.Screen
 import com.example.superapp.navigation.SystemBackButtonHandler
 import com.example.superapp.rememberImeState
 
 @Composable
-fun SignInScreen() {
+fun SignInScreen(loginViewModel: LoginViewModel= viewModel()) {
 
     val imeState = rememberImeState()
     val scrollState = rememberScrollState()
@@ -58,7 +62,7 @@ fun SignInScreen() {
                 .fillMaxSize()
                 .verticalScroll(scrollState)
         ) {
-            MainLayout()
+            MainLayout(loginViewModel)
         }
     }
     LaunchedEffect(key1 =imeState.value){
@@ -76,63 +80,71 @@ fun SignInScreen() {
 }
 
 @Composable
-private fun MainLayout() {
+private fun MainLayout(loginViewModel: LoginViewModel) {
 
     Column(
         Modifier
             .padding(horizontal = 15.dp)
             .fillMaxHeight(),
     ) {
-            Spacer(modifier = Modifier.height(25.dp))
+        Spacer(modifier = Modifier.height(25.dp))
 
-            NormalTextComponent(
-                value = stringResource(id = R.string.hello)
-            )
-            HeadingTextComponent(
-                value = stringResource(id = R.string.welcome_back)
-            )
-            Spacer(modifier = Modifier.height(20.dp))
+        NormalTextComponent(
+            value = stringResource(id = R.string.hello)
+        )
+        HeadingTextComponent(
+            value = stringResource(id = R.string.welcome_back)
+        )
+        Spacer(modifier = Modifier.height(20.dp))
 
-            NormalTextComponent(
-                value = stringResource(id = R.string.login)
-            )
-            Spacer(modifier = Modifier.height(10.dp))
-
-
-            TextFieldComponent(
-                labelValue = stringResource(id = R.string.email),
-                icon = Icons.Outlined.Email,
-                isEmail = true
-            )
-
-            Spacer(
-                modifier = Modifier.height(5.dp)
-            )
+        NormalTextComponent(
+            value = stringResource(id = R.string.login)
+        )
+        Spacer(modifier = Modifier.height(10.dp))
 
 
-            PasswordFieldComponent(
-                labelValue = stringResource(id = R.string.password),
-                icon = Icons.Outlined.Lock
-            )
+        TextFieldComponent(
+            labelValue = stringResource(id = R.string.email),
+            icon = Icons.Outlined.Email,
+            isEmail = true,
+            onTextSelected = {
+                loginViewModel.onEvent(LoginUiEvent.EmailChanged(it))
+            }
+        )
 
-            Spacer(
-                modifier = Modifier.height(10.dp)
-            )
+        Spacer(
+            modifier = Modifier.height(5.dp)
+        )
+
+
+        PasswordFieldComponent(
+            labelValue = stringResource(id = R.string.password),
+            icon = Icons.Outlined.Lock,
+            onTextSelected = {
+                loginViewModel.onEvent(LoginUiEvent.PasswordChanged(it))
+            }
+        )
+
+        Spacer(
+            modifier = Modifier.height(10.dp)
+        )
 
         UnderLinedClickableTextComponent(value = "Forgot Password?") {
             Log.d("TAG", "MainLayout: Forgot Password")
 
         }
 
-            Spacer(
-                modifier = Modifier.height(25.dp)
-            )
+        Spacer(
+            modifier = Modifier.height(25.dp)
+        )
 
         ButtonComponent(
             value = stringResource(R.string.login),
             onClick = {
-                Log.d("Pressed", "BottomSection: Button Pressed ")
-            }
+                loginViewModel.onEvent(LoginUiEvent.LoginButtonClicked)
+
+            },
+            isEnabled = loginViewModel.allValidationsPassed.value
         )
         Spacer(
             modifier = Modifier.height(20.dp)
@@ -175,6 +187,9 @@ private fun MainLayout() {
         Spacer(
             modifier = Modifier.height(10.dp)
         )
+        if (loginViewModel.loginProgress.value) {
+            LoaderComponent()
+        }
 
     }
 
@@ -183,5 +198,5 @@ private fun MainLayout() {
 @Preview(device = Devices.PIXEL_XL)
 @Composable
 private fun DefaultPreview() {
-    MainLayout()
+    MainLayout(loginViewModel = LoginViewModel())
 }

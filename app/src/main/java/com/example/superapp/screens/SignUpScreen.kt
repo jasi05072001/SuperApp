@@ -30,16 +30,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.superapp.R
 import com.example.superapp.components.AlreadyHaveAccountComponent
 import com.example.superapp.components.ButtonComponent
-import com.example.superapp.components.CheckBoxComponent
 import com.example.superapp.components.DividerTextComponent
 import com.example.superapp.components.HeadingTextComponent
+import com.example.superapp.components.LoaderComponent
 import com.example.superapp.components.NormalTextComponent
 import com.example.superapp.components.OtherLoginOptionsComponent
 import com.example.superapp.components.PasswordFieldComponent
 import com.example.superapp.components.TextFieldComponent
+import com.example.superapp.data.SignUpUiEvent
+import com.example.superapp.data.SignUpViewModel
 import com.example.superapp.navigation.AppRouter
 import com.example.superapp.navigation.Screen
 import com.example.superapp.rememberImeState
@@ -50,6 +53,7 @@ fun SignUpScreen() {
     val imeState = rememberImeState()
     val scrollState = rememberScrollState()
     val  uiColor = if (isSystemInDarkTheme())Color(0xff1E293B) else Color(0xffBFDBFE)
+    val signUpViewModel = viewModel<SignUpViewModel>()
 
     Surface(color = uiColor) {
         Column(
@@ -57,24 +61,23 @@ fun SignUpScreen() {
                 .fillMaxSize()
                 .verticalScroll(scrollState)
         ) {
-            MainLayout()
+            MainLayout(
+                signUpViewModel
+            )
         }
     }
     LaunchedEffect(key1 =imeState.value){
         if(imeState.value){
             scrollState.animateScrollTo(
-                scrollState.maxValue,
+                scrollState.value + 500,
                 animationSpec = tween(1000, easing = EaseInOut)
             )
         }
     }
 }
 
-
-
-
 @Composable
-private fun MainLayout() {
+private fun MainLayout(signUpViewModel: SignUpViewModel) {
 
     Column(Modifier.padding(horizontal = 15.dp)) {
 
@@ -96,7 +99,11 @@ private fun MainLayout() {
 
         TextFieldComponent(
             labelValue = stringResource(id = R.string.name),
-            icon = Icons.Outlined.PersonOutline
+            icon = Icons.Outlined.PersonOutline,
+            onTextSelected = {
+                signUpViewModel.onEvent(SignUpUiEvent.NameChanged(it))
+
+            }
         )
 
         Spacer(
@@ -105,7 +112,12 @@ private fun MainLayout() {
 
         TextFieldComponent(
             labelValue = stringResource(id = R.string.email),
-            icon = Icons.Outlined.Email, isEmail = true
+            icon = Icons.Outlined.Email,
+            isEmail = true,
+            onTextSelected = {
+                signUpViewModel.onEvent(SignUpUiEvent.EmailChanged(it))
+
+            }
         )
 
         Spacer(
@@ -114,28 +126,38 @@ private fun MainLayout() {
 
         PasswordFieldComponent(
             labelValue = stringResource(id = R.string.password),
-            icon = Icons.Outlined.Lock
+            icon = Icons.Outlined.Lock,
+            onTextSelected = {
+                signUpViewModel.onEvent(SignUpUiEvent.PasswordChanged(it))
+            }
         )
 
         Spacer(
-            modifier = Modifier.height(5.dp)
+            modifier = Modifier.height(25.dp)
         )
 
-        CheckBoxComponent(
-            onTextSelected = {
-                AppRouter.navigateTo(Screen.TermsAndConditionsScreen)
-            }
-        )
-        Spacer(modifier = Modifier.height(15.dp))
+//        CheckBoxComponent(
+//            onTextSelected = {
+//                AppRouter.navigateTo(Screen.TermsAndConditionsScreen)
+//            },
+//            onCheckedChange = {
+//                Log.d("TAG13", "MainLayout: $it")
+//                loginViewModel.onEvent(UiEvent.PrivacyPolicyCheckBoxClicked(it))
+//            }
+//        )
+//        Spacer(modifier = Modifier.height(15.dp))
 
         ButtonComponent(
+
             value = stringResource(R.string.register),
+            isEnabled = signUpViewModel.allValidationsPassed.value,
             onClick = {
-                Log.d("Pressed", "BottomSection: Button Pressed ")
-            }
-        )
+                signUpViewModel.onEvent(SignUpUiEvent.RegisterButtonClicked)
+            },
+
+            )
         Spacer(
-            modifier = Modifier.height(5.dp)
+            modifier = Modifier.height(10.dp)
         )
         DividerTextComponent()
 
@@ -162,19 +184,20 @@ private fun MainLayout() {
                 onClick = { Log.d("TAG", "BottomSection: facebook") })
         }
         Spacer(
-            modifier = Modifier.height(30.dp)
+            modifier = Modifier.height(20.dp)
         )
 
         AlreadyHaveAccountComponent(
             startValue = "Already have an Account? ",
             clickableValue = "Login",
 
-        ) {
+            ) {
             AppRouter.navigateTo(Screen.SignInScreen)
-
+        }
+        if (signUpViewModel.signUpProgress.value){
+            LoaderComponent()
 
         }
-
 
     }
 
