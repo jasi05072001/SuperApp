@@ -8,4 +8,9 @@
     <string name="password">Password</string>
     <string name="hide_password">Hide Password</string>
     <string name="show_password">Show Password</string>
+    <string name="register">Register</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="or">OR</string>
+    <string name="welcome_back">Welcome Back</string>
+    <string name="login">Login</string>
 </resources>

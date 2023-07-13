@@ -1,22 +1,33 @@
 package com.example.superapp.components
 
-import android.widget.CheckBox
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,8 +42,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -41,6 +57,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.superapp.R
@@ -56,7 +76,7 @@ object AppFonts{
 }
 
 @Composable
-fun NormalText(value:String) {
+fun NormalTextComponent(value:String) {
 
     val uiColor = if (isSystemInDarkTheme()) Color.White else Color.Black
 
@@ -75,7 +95,7 @@ fun NormalText(value:String) {
 
 }
 @Composable
-fun HeadingText(value:String) {
+fun HeadingTextComponent(value:String) {
 
     val uiColor = if (isSystemInDarkTheme()) Color.White else Color.Black
 
@@ -95,7 +115,7 @@ fun HeadingText(value:String) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MyTextField(labelValue :String, icon: ImageVector,isEmail :Boolean = false) {
+fun TextFieldComponent(labelValue :String, icon: ImageVector, isEmail :Boolean = false) {
 
     val uiColor = if (isSystemInDarkTheme()) Color.White else Color.Black
 
@@ -110,6 +130,7 @@ fun MyTextField(labelValue :String, icon: ImageVector,isEmail :Boolean = false) 
         value = textValue.value,
         onValueChange = { textValue.value = it },
         singleLine = true,
+        maxLines = 1,
         label = {
             Text(
                 text = labelValue,
@@ -145,7 +166,7 @@ fun MyTextField(labelValue :String, icon: ImageVector,isEmail :Boolean = false) 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PassWordField(labelValue :String, icon: ImageVector) {
+fun PasswordFieldComponent(labelValue :String, icon: ImageVector) {
 
     val uiColor = if (isSystemInDarkTheme()) Color.White else Color.Black
 
@@ -155,6 +176,7 @@ fun PassWordField(labelValue :String, icon: ImageVector) {
     val passwordVisible = remember {
         mutableStateOf(false)
     }
+    val localFocusManager = LocalFocusManager.current
 
     OutlinedTextField(
         shape = RoundedCornerShape(8.dp),
@@ -163,6 +185,7 @@ fun PassWordField(labelValue :String, icon: ImageVector) {
         value = password.value,
         onValueChange = { password.value = it },
         singleLine = true,
+        maxLines = 1,
         label = {
             Text(
                 text = labelValue,
@@ -187,11 +210,12 @@ fun PassWordField(labelValue :String, icon: ImageVector) {
             unfocusedLabelColor = MaterialTheme.colorScheme.unfocusedTextFieldText,
             cursorColor = MaterialTheme.colorScheme.focusedTextFieldText,
         ),
-        keyboardActions = KeyboardActions(
-
-        ),
+        keyboardActions = KeyboardActions{
+            localFocusManager.clearFocus()
+        },
         keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Password, imeAction = ImeAction.Done
+            keyboardType = KeyboardType.Password,
+            imeAction = ImeAction.Done,
         ),
         trailingIcon = {
 
@@ -228,7 +252,7 @@ fun PassWordField(labelValue :String, icon: ImageVector) {
 }
 
 @Composable
-fun CheckBoxComponent(value :String) {
+fun CheckBoxComponent(onTextSelected: (String) -> Unit ) {
 
     val checkBoxState = remember {
         mutableStateOf(false)
@@ -239,9 +263,9 @@ fun CheckBoxComponent(value :String) {
     Row(
         Modifier
             .fillMaxWidth()
-            .heightIn(56.dp)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .heightIn(56.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
     ) {
         Checkbox(
             checked  = checkBoxState.value,
@@ -249,10 +273,293 @@ fun CheckBoxComponent(value :String) {
             colors = CheckboxDefaults.colors(
                 checkmarkColor = uiColor,
                 checkedColor = uiColor2,
-            )
+            ),
+            modifier = Modifier
+                .size(20.dp)
+
+
         )
-        NormalText(value =value)
+        Spacer(modifier = Modifier.width(8.dp))
+        ClickableTextComponent(onTextSelected)
 
     }
 
 }
+
+@Composable
+fun ClickableTextComponent(onTextSelected: (String) -> Unit ) {
+
+    val uiColor = if (isSystemInDarkTheme()) Color.White else Color.Black
+
+    val initialText = "By continuing you accept our "
+    val privacyPolicyText = "Privacy Policy"
+    val andText = " and "
+    val termsOfServiceText = "Terms of Service"
+
+    val annotatedSting = buildAnnotatedString {
+        withStyle(
+            style = SpanStyle(
+                color = uiColor,
+                fontWeight = FontWeight.Normal,
+                fontFamily = AppFonts.fontFamily
+            )
+        ) {
+            append(initialText)
+        }
+        withStyle(
+            style = SpanStyle(
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                fontFamily = AppFonts.fontFamily,
+                textDecoration = TextDecoration.Underline
+            )
+        ) {
+            pushStringAnnotation(tag = privacyPolicyText, annotation = privacyPolicyText)
+            append(privacyPolicyText)
+        }
+        withStyle(
+            style = SpanStyle(
+                color = uiColor,
+                fontWeight = FontWeight.Normal,
+                fontFamily = AppFonts.fontFamily
+            )
+        ) {
+            append(andText)
+        }
+        withStyle(
+            style = SpanStyle(
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                fontFamily = AppFonts.fontFamily,
+                textDecoration = TextDecoration.Underline
+            )
+        ) {
+            pushStringAnnotation(tag = termsOfServiceText, annotation = termsOfServiceText)
+            append(termsOfServiceText)
+        }
+
+    }
+
+    ClickableText(
+        text = annotatedSting ,
+        onClick ={offset ->
+
+            annotatedSting.getStringAnnotations(offset,offset)
+                .firstOrNull()?.also {span->
+                    if ((span.item == privacyPolicyText) || (span.item == termsOfServiceText)) {
+                        onTextSelected(span.item)
+
+                    }
+                }
+        },
+        modifier = Modifier
+            .padding(8.dp),
+        maxLines = 2,
+        overflow = TextOverflow.Ellipsis,
+    )
+
+}
+
+@Composable
+fun CircleAvatar(
+    image: Painter,
+    modifier: Modifier = Modifier,
+    contentDescription: String? = null,
+    size: Dp = 30.dp
+) {
+    Box(
+        modifier = modifier
+            .size(size)
+            .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape)
+            .clip(CircleShape)
+    ) {
+        Image(
+            painter = image,
+            contentDescription = contentDescription,
+            contentScale = ContentScale.Fit,
+            modifier = Modifier.padding(4.dp)
+        )
+    }
+}
+
+@Composable
+fun ButtonComponent(
+    value: String,
+    onClick: () -> Unit,
+    isEnabled : Boolean = true
+) {
+    val buttonColor =
+        if (isSystemInDarkTheme())
+            Color(0xff334155)
+        else
+            Color(0xff000113)
+
+    val textColor = Color.White
+
+    Button(
+        onClick = onClick,
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(48.dp),
+        shape = RoundedCornerShape(8.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = buttonColor,
+            contentColor = textColor
+        ),
+        enabled = isEnabled,
+    ) {
+        Text(
+            text = value,
+            fontFamily = AppFonts.fontFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp
+        )
+    }
+
+}
+
+@Composable
+fun DividerTextComponent() {
+
+    val dividerColor =
+        if (isSystemInDarkTheme())
+            Color(0xffffffff)
+        else
+            Color(0xff000113)
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        Divider(
+            Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            color = dividerColor,
+            thickness = 0.7.dp
+        )
+
+        Text(
+            text = stringResource(R.string.or),
+            color = dividerColor,
+            modifier = Modifier
+                .padding(8.dp),
+            fontFamily = AppFonts.fontFamily,
+        )
+        Divider(
+            Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            color = dividerColor,
+            thickness = 0.7.dp
+        )
+
+    }
+}
+
+@Composable
+fun OtherLoginOptionsComponent( image: Painter,onClick: () -> Unit,contentDescription: String? = null) {
+
+    val uiColor =
+        if (isSystemInDarkTheme())
+            Color(0xff334155)
+        else
+            Color(0xffffffff)
+
+    Card(
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 10.dp,
+        ),
+        shape = RoundedCornerShape(8.dp),
+        modifier = Modifier.size(50.dp)
+        ,
+        colors = CardDefaults.cardColors(containerColor =  uiColor)
+
+    ) {
+        Box(Modifier.clickable(onClick = onClick)) {
+            Image(
+                painter = image,
+                contentDescription = contentDescription,
+                Modifier
+                    .padding(10.dp)
+                    .size(40.dp)
+
+            )
+        }
+    }
+}
+
+@Composable
+fun AlreadyHaveAccountComponent(
+    startValue:String,
+    clickableValue:String,
+    onClick: () -> Unit
+) {
+    val uiColor = if (isSystemInDarkTheme()) Color.White else Color.Black
+
+    val annotatedString = buildAnnotatedString {
+        withStyle(
+            style = SpanStyle(
+                color = uiColor,
+                fontWeight = FontWeight.Normal,
+                fontFamily = AppFonts.fontFamily,
+                fontSize = 16.sp
+            )
+        ) {
+            append(startValue)
+        }
+        withStyle(
+            style = SpanStyle(
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                fontFamily = AppFonts.fontFamily,
+                textDecoration = TextDecoration.Underline,
+                fontSize = 16.sp
+            )
+        ) {
+            pushStringAnnotation(tag = clickableValue, annotation = clickableValue)
+            append(clickableValue)
+        }
+
+    }
+
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center,modifier = Modifier.fillMaxWidth()) {
+        ClickableText(
+            text = annotatedString,
+            onClick = { offset ->
+                annotatedString.getStringAnnotations(offset, offset)
+                    .firstOrNull()?.also { span ->
+                        if (span.item == clickableValue) {
+                            onClick()
+                        }
+                    }
+            },
+
+            )
+    }
+}
+
+@Composable
+fun UnderLinedClickableTextComponent(value: String,onClick: () -> Unit) {
+    val uiColor = if (isSystemInDarkTheme()) Color.White else Color.Black
+
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.End,modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = value,
+            modifier = Modifier
+                .padding(8.dp)
+                .clickable(onClick = onClick),
+            color = uiColor,
+            fontFamily = AppFonts.fontFamily,
+            fontWeight = FontWeight.Bold,
+            textDecoration = TextDecoration.Underline,
+            fontSize = 14.sp,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+
+
+

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,7 +19,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,23 +33,24 @@ import androidx.compose.ui.unit.dp
 import com.example.superapp.R
 import com.example.superapp.components.AlreadyHaveAccountComponent
 import com.example.superapp.components.ButtonComponent
-import com.example.superapp.components.CheckBoxComponent
 import com.example.superapp.components.DividerTextComponent
 import com.example.superapp.components.HeadingTextComponent
 import com.example.superapp.components.NormalTextComponent
 import com.example.superapp.components.OtherLoginOptionsComponent
 import com.example.superapp.components.PasswordFieldComponent
 import com.example.superapp.components.TextFieldComponent
+import com.example.superapp.components.UnderLinedClickableTextComponent
 import com.example.superapp.navigation.AppRouter
 import com.example.superapp.navigation.Screen
+import com.example.superapp.navigation.SystemBackButtonHandler
 import com.example.superapp.rememberImeState
 
 @Composable
-fun SignUpScreen() {
+fun SignInScreen() {
 
     val imeState = rememberImeState()
     val scrollState = rememberScrollState()
-    val  uiColor = if (isSystemInDarkTheme())Color(0xff1E293B) else Color(0xffBFDBFE)
+    val  uiColor = if (isSystemInDarkTheme()) Color(0xff1E293B) else Color(0xffBFDBFE)
 
     Surface(color = uiColor) {
         Column(
@@ -68,79 +69,78 @@ fun SignUpScreen() {
             )
         }
     }
+    SystemBackButtonHandler {
+        AppRouter.navigateTo(Screen.SignUpScreen)
+    }
+
 }
-
-
-
 
 @Composable
 private fun MainLayout() {
 
-    Column(Modifier.padding(horizontal = 15.dp)) {
+    Column(
+        Modifier
+            .padding(horizontal = 15.dp)
+            .fillMaxHeight(),
+    ) {
+            Spacer(modifier = Modifier.height(25.dp))
 
-        Spacer(modifier = Modifier.height(25.dp))
+            NormalTextComponent(
+                value = stringResource(id = R.string.hello)
+            )
+            HeadingTextComponent(
+                value = stringResource(id = R.string.welcome_back)
+            )
+            Spacer(modifier = Modifier.height(20.dp))
 
-        NormalTextComponent(
-            value = stringResource(id = R.string.hello)
-        )
-        HeadingTextComponent(
-            value = stringResource(id = R.string.create_account)
-        )
-        Spacer(modifier = Modifier.height(20.dp))
-
-        NormalTextComponent(
-            value = stringResource(id = R.string.sign_up)
-        )
-        Spacer(modifier = Modifier.height(10.dp))
+            NormalTextComponent(
+                value = stringResource(id = R.string.login)
+            )
+            Spacer(modifier = Modifier.height(10.dp))
 
 
-        TextFieldComponent(
-            labelValue = stringResource(id = R.string.name),
-            icon = Icons.Outlined.PersonOutline
-        )
+            TextFieldComponent(
+                labelValue = stringResource(id = R.string.email),
+                icon = Icons.Outlined.Email,
+                isEmail = true
+            )
 
-        Spacer(
-            modifier = Modifier.height(5.dp)
-        )
+            Spacer(
+                modifier = Modifier.height(5.dp)
+            )
 
-        TextFieldComponent(
-            labelValue = stringResource(id = R.string.email),
-            icon = Icons.Outlined.Email, isEmail = true
-        )
 
-        Spacer(
-            modifier = Modifier.height(5.dp)
-        )
+            PasswordFieldComponent(
+                labelValue = stringResource(id = R.string.password),
+                icon = Icons.Outlined.Lock
+            )
 
-        PasswordFieldComponent(
-            labelValue = stringResource(id = R.string.password),
-            icon = Icons.Outlined.Lock
-        )
+            Spacer(
+                modifier = Modifier.height(10.dp)
+            )
 
-        Spacer(
-            modifier = Modifier.height(5.dp)
-        )
+        UnderLinedClickableTextComponent(value = "Forgot Password?") {
+            Log.d("TAG", "MainLayout: Forgot Password")
 
-        CheckBoxComponent(
-            onTextSelected = {
-                AppRouter.navigateTo(Screen.TermsAndConditionsScreen)
-            }
-        )
-        Spacer(modifier = Modifier.height(15.dp))
+        }
+
+            Spacer(
+                modifier = Modifier.height(25.dp)
+            )
 
         ButtonComponent(
-            value = stringResource(R.string.register),
+            value = stringResource(R.string.login),
             onClick = {
                 Log.d("Pressed", "BottomSection: Button Pressed ")
             }
         )
         Spacer(
-            modifier = Modifier.height(5.dp)
+            modifier = Modifier.height(20.dp)
         )
-        DividerTextComponent()
 
+        DividerTextComponent()
         Spacer(
-            modifier = Modifier.height(15.dp)
+            modifier = Modifier.height(30.dp)
         )
 
         Row(
@@ -166,15 +166,15 @@ private fun MainLayout() {
         )
 
         AlreadyHaveAccountComponent(
-            startValue = "Already have an Account? ",
-            clickableValue = "Login",
+            startValue = "Don't have an Account yet? ",
+            clickableValue = stringResource(id = R.string.sign_up),
 
-        ) {
-            AppRouter.navigateTo(Screen.SignInScreen)
-
-
+            ) {
+            AppRouter.navigateTo(Screen.SignUpScreen)
         }
-
+        Spacer(
+            modifier = Modifier.height(10.dp)
+        )
 
     }
 
@@ -183,5 +183,5 @@ private fun MainLayout() {
 @Preview(device = Devices.PIXEL_XL)
 @Composable
 private fun DefaultPreview() {
-    SignUpScreen()
+    MainLayout()
 }
