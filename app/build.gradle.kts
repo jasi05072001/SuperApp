@@ -84,7 +84,10 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx")
 
     //lottie
-    implementation ("com.airbnb.android:lottie-compose:4.0.0")
+    implementation("com.airbnb.android:lottie-compose:4.0.0")
+
+    //material 2
+    implementation("androidx.compose.material:material:1.4.3")
 }
 kapt {
     correctErrorTypes = true

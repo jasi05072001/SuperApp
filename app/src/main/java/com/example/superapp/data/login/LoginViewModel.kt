@@ -1,4 +1,4 @@
-package com.example.superapp.data
+package com.example.superapp.data.login
 
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf

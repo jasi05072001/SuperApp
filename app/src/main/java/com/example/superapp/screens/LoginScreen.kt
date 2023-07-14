@@ -42,19 +42,19 @@ import com.example.superapp.components.OtherLoginOptionsComponent
 import com.example.superapp.components.PasswordFieldComponent
 import com.example.superapp.components.TextFieldComponent
 import com.example.superapp.components.UnderLinedClickableTextComponent
-import com.example.superapp.data.LoginUiEvent
-import com.example.superapp.data.LoginViewModel
+import com.example.superapp.data.login.LoginUiEvent
+import com.example.superapp.data.login.LoginViewModel
 import com.example.superapp.navigation.AppRouter
 import com.example.superapp.navigation.Screen
 import com.example.superapp.navigation.SystemBackButtonHandler
 import com.example.superapp.rememberImeState
 
 @Composable
-fun SignInScreen(loginViewModel: LoginViewModel= viewModel()) {
+fun SignInScreen(loginViewModel: LoginViewModel = viewModel()) {
 
     val imeState = rememberImeState()
     val scrollState = rememberScrollState()
-    val  uiColor = if (isSystemInDarkTheme()) Color(0xff1E293B) else Color(0xffBFDBFE)
+    val uiColor = if (isSystemInDarkTheme()) Color(0xff1E293B) else Color(0xffBFDBFE)
 
     Surface(color = uiColor) {
         Column(
@@ -68,7 +68,7 @@ fun SignInScreen(loginViewModel: LoginViewModel= viewModel()) {
     LaunchedEffect(key1 =imeState.value){
         if(imeState.value){
             scrollState.animateScrollTo(
-                scrollState.maxValue,
+                scrollState.value + 200,
                 animationSpec = tween(1000, easing = EaseInOut)
             )
         }

@@ -1,4 +1,4 @@
-package com.example.superapp.data
+package com.example.superapp.data.signUp
 
 data class RegistrationUiState(
     val name: String = "",

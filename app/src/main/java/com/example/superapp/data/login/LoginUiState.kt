@@ -1,4 +1,4 @@
-package com.example.superapp.data
+package com.example.superapp.data.login
 
 data class LoginUiState(
     val email: String = "",

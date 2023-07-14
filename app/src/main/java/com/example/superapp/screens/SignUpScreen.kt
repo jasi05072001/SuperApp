@@ -41,8 +41,8 @@ import com.example.superapp.components.NormalTextComponent
 import com.example.superapp.components.OtherLoginOptionsComponent
 import com.example.superapp.components.PasswordFieldComponent
 import com.example.superapp.components.TextFieldComponent
-import com.example.superapp.data.SignUpUiEvent
-import com.example.superapp.data.SignUpViewModel
+import com.example.superapp.data.signUp.SignUpUiEvent
+import com.example.superapp.data.signUp.SignUpViewModel
 import com.example.superapp.navigation.AppRouter
 import com.example.superapp.navigation.Screen
 import com.example.superapp.rememberImeState

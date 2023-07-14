@@ -55,8 +55,7 @@ fun SplashScreen() {
 
     LaunchedEffect(Unit) {
         isVisible = true
-        delay(3000)
-
+        delay(2900)
         AppRouter.navigateTo(Screen.SignUpScreen)
     }
 
@@ -99,9 +98,7 @@ fun SplashScreen() {
                 }
                 )
             ) + fadeIn(
-                animationSpec = tween(1450, easing =
-                //EaseOutExpo
-                {
+                animationSpec = tween(1450, easing = {
                     // Sinusoidal easing
                     val pi = 3.14f
                     (-0.5f * kotlin.math.cos(it * pi / 1.0f) + 0.5f)
@@ -118,11 +115,6 @@ fun SplashScreen() {
                         fontFamily = AppFonts.fontFamily
                     ),
                 )
-
-
         }
-
-
     }
-
 }

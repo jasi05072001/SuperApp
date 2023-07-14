@@ -16,12 +16,15 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Button
@@ -38,6 +41,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,6 +55,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -75,6 +81,7 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.superapp.R
+import com.example.superapp.data.NavigationItem
 import com.example.superapp.ui.theme.focusedTextFieldText
 import com.example.superapp.ui.theme.unfocusedTextFieldText
 
@@ -627,9 +634,147 @@ fun LoaderComponent() {
 
             )
         }
-        
+
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AppToolBar(
+    title: String,
+    logoutButtonClick: () -> Unit,
+    navigationIconClick: () -> Unit
+) {
+
+    val toolBarColor = if (isSystemInDarkTheme()) Color(0xff1E293B) else Color(0xffBFDBFE)
+    val titleColor = if (isSystemInDarkTheme()) Color.White else Color.Black
+
+    TopAppBar(
+        title = {
+            Text(
+                text = title,
+                fontFamily = AppFonts.fontFamily,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 20.sp,
+                color = titleColor
+            )
+        },
+        navigationIcon = {
+            IconButton(
+                onClick = {
+                    navigationIconClick.invoke()
+                }
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_menu),
+                    contentDescription = "Menu",
+                    tint = if (isSystemInDarkTheme()) Color.White else Color.Black,
+                )
+            }
+        },
+        colors = TopAppBarDefaults.smallTopAppBarColors(
+            containerColor = toolBarColor,
+
+            ),
+        actions = {
+            IconButton(
+                onClick = {
+                    logoutButtonClick()
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Logout,
+                    contentDescription = "Logout",
+                    tint = titleColor
+                )
+            }
+        }
+
+    )
+}
+
+@Composable
+fun NavigationDrawerHeader(value: String) {
+    val containerColor = if (isSystemInDarkTheme()) Color.Cyan else Color(0xff14213d)
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 180.dp, max = 190.dp)
+            .background(containerColor),
+        contentAlignment = Alignment.Center
+    ) {
+
+        val uiColor = if (isSystemInDarkTheme()) Color.Black else Color.White
+
+        Text(
+            text = value,
+            color = uiColor,
+            fontFamily = AppFonts.fontFamily,
+            modifier = Modifier
+                .fillMaxWidth(),
+            fontSize = 25.sp,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center
+
+        )
+
     }
 
+}
+
+@Composable
+fun NavigationDrawerBody(
+    navigationDrawerItems: List<NavigationItem>,
+    onNavigationItemClick: (NavigationItem) -> Unit
+) {
+
+    val dividerColor =
+        if (isSystemInDarkTheme())
+            Color(0xffffffff)
+        else
+            Color(0xff000113)
+
+    LazyColumn(modifier = Modifier.fillMaxWidth()) {
+        items(navigationDrawerItems) {
+            NavigationItemRow(item = it, onNavigationItemClick = { item ->
+                onNavigationItemClick.invoke(item)
+            })
+            Divider(
+                color = dividerColor, thickness = 1.dp,
+                modifier = Modifier.padding(horizontal = 10.dp)
+            )
+
+        }
+    }
+}
+
+@Composable
+fun NavigationItemRow(item: NavigationItem, onNavigationItemClick: (NavigationItem) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 10.dp)
+            .clickable {
+                onNavigationItemClick.invoke(item)
+            }
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+
+        ) {
+        Icon(
+            painter = painterResource(id = item.icon),
+            contentDescription = item.description
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            text = item.title,
+            fontFamily = AppFonts.fontFamily,
+            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp,
+            textAlign = TextAlign.Center
+        )
+
+    }
 
 }
 

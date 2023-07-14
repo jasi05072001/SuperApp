@@ -1,4 +1,4 @@
-package com.example.superapp.data
+package com.example.superapp.data.signUp
 
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
@@ -102,14 +102,4 @@ class SignUpViewModel: ViewModel() {
             }
     }
 
-    fun logOut(){
-        val firebaseAuth = FirebaseAuth.getInstance()
-        firebaseAuth.signOut()
-        val authStateListener = FirebaseAuth.AuthStateListener {
-            if (it.currentUser == null){
-                AppRouter.navigateTo(Screen.SignUpScreen)
-            }
-        }
-        firebaseAuth.addAuthStateListener(authStateListener)
-    }
 }
