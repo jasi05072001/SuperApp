@@ -64,7 +64,6 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
@@ -88,6 +87,13 @@ dependencies {
 
     //material 2
     implementation("androidx.compose.material:material:1.4.3")
+
+    //rxKotlin
+    implementation("io.reactivex.rxjava3:rxkotlin:3.0.0")
+    implementation("io.reactivex.rxjava3:rxjava:3.0.2")
+
+    //custom toast
+    implementation("com.github.Spikeysanju:MotionToast:1.4")
 }
 kapt {
     correctErrorTypes = true

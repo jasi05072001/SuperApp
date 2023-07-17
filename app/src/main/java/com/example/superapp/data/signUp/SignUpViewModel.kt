@@ -25,18 +25,22 @@ class SignUpViewModel: ViewModel() {
                 registrationUiState.value = registrationUiState.value.copy(email = event.email)
 
             }
+
             is SignUpUiEvent.PasswordChanged -> {
-                registrationUiState.value = registrationUiState.value.copy(password = event.password)
+                registrationUiState.value =
+                    registrationUiState.value.copy(password = event.password)
 
             }
+
             is SignUpUiEvent.RegisterButtonClicked -> {
                 signUp()
             }
-//            is UiEvent.PrivacyPolicyCheckBoxClicked -> {
-//                registrationUiState.value = registrationUiState.value.copy(
-//                    privacyPolicyAccepted = event.status
-//                )
-//            }
+
+            is SignUpUiEvent.PrivacyPolicyCheckBoxClicked -> {
+                registrationUiState.value = registrationUiState.value.copy(
+                    privacyPolicyAccepted = event.status
+                )
+            }
         }
 
     }
@@ -60,15 +64,15 @@ class SignUpViewModel: ViewModel() {
             password = registrationUiState.value.password
         )
 
-//        val privacyPolicyResult = Validator.validatePrivacyPolicyAcceptance(
-//            statusValue  = registrationUiState.value.privacyPolicyAccepted
-//        )
+        val privacyPolicyResult = Validator.validatePrivacyPolicyAcceptance(
+            statusValue = registrationUiState.value.privacyPolicyAccepted
+        )
 
         registrationUiState.value = registrationUiState.value.copy(
             isNameValid = nameResult.status,
             isEmailValid = emailResult.status,
             isPasswordValid = passwordResult.status,
-            // privacyPolicyError = privacyPolicyResult.status
+            privacyPolicyError = privacyPolicyResult.status
         )
 
         allValidationsPassed.value =
@@ -77,8 +81,8 @@ class SignUpViewModel: ViewModel() {
                     emailResult.status
                     &&
                     passwordResult.status
-//                    &&
-//                    privacyPolicyResult.status
+                    &&
+                    privacyPolicyResult.status
 
     }
 

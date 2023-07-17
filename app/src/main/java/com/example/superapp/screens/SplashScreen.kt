@@ -31,14 +31,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.superapp.R
 import com.example.superapp.components.AppFonts
+import com.example.superapp.data.home.HomeViewModel
 import com.example.superapp.navigation.AppRouter
 import com.example.superapp.navigation.Screen
 import kotlinx.coroutines.delay
 
 @Composable
-fun SplashScreen() {
+fun SplashScreen(homeViewModel: HomeViewModel = viewModel()) {
+
+    homeViewModel.checkForActiveSession()
 
     var isVisible by remember { mutableStateOf(false) }
 
@@ -56,7 +60,12 @@ fun SplashScreen() {
     LaunchedEffect(Unit) {
         isVisible = true
         delay(2900)
-        AppRouter.navigateTo(Screen.SignUpScreen)
+
+        if (homeViewModel.isUserLoggedIn.value == true) {
+            AppRouter.navigateTo(Screen.HomeScreen)
+        } else {
+            AppRouter.navigateTo(Screen.SignUpScreen)
+        }
     }
 
     Column(
@@ -79,7 +88,7 @@ fun SplashScreen() {
         ) {
 
            Image(
-               painter = painterResource(id = R.drawable.aura_icon),
+               painter = painterResource(id = R.drawable.img_logo),
                contentDescription = "App Icon",
            )
 

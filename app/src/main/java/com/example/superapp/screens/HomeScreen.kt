@@ -31,6 +31,8 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
     val drawerColor = if (isSystemInDarkTheme()) Color(0xff1E293B) else Color(0xffBFDBFE)
     val coroutineScope = rememberCoroutineScope()
 
+    homeViewModel.getUserData()
+
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
@@ -43,14 +45,14 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
                     coroutineScope.launch {
                         scaffoldState.drawerState.open()
                     }
-                }
+                },
             )
         },
         drawerShape = RoundedCornerShape(topEnd = 16.dp, bottomEnd = 16.dp),
         drawerBackgroundColor = drawerColor,
         drawerElevation = 16.dp,
         drawerContent = {
-            NavigationDrawerHeader("Welcome to SuperApp")
+            NavigationDrawerHeader("Welcome ${homeViewModel.emailId.value}")
             NavigationDrawerBody(
                 navigationDrawerItems = homeViewModel.navigationItemsList,
                 onNavigationItemClick = {
@@ -73,8 +75,4 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
         }
 
     }
-
-
-
-
 }

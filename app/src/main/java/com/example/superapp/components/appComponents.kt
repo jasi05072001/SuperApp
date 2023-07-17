@@ -8,14 +8,17 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -40,6 +43,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -57,6 +61,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
@@ -134,10 +139,13 @@ fun HeadingTextComponent(value:String) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TextFieldComponent(
-    labelValue :String,
+    labelValue: String,
     icon: ImageVector,
-    isEmail :Boolean = false,
-    onTextSelected: (String) -> Unit
+    isEmail: Boolean = false,
+    onTextSelected: (String) -> Unit,
+    imeAction: ImeAction = ImeAction.Next,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+    placeholder: Placeholder? = null,
 ) {
 
     val uiColor = if (isSystemInDarkTheme()) Color.White else Color.Black
@@ -181,10 +189,10 @@ fun TextFieldComponent(
             unfocusedLabelColor = MaterialTheme.colorScheme.unfocusedTextFieldText,
             cursorColor = MaterialTheme.colorScheme.focusedTextFieldText,
         ),
-        keyboardActions = KeyboardActions.Default,
+        keyboardActions = keyboardActions,
         keyboardOptions = KeyboardOptions(
             keyboardType = if (isEmail) KeyboardType.Email else KeyboardType.Text,
-            imeAction = ImeAction.Next
+            imeAction = imeAction
         )
     )
 
@@ -637,7 +645,6 @@ fun LoaderComponent() {
 
     }
 }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppToolBar(
@@ -645,9 +652,9 @@ fun AppToolBar(
     logoutButtonClick: () -> Unit,
     navigationIconClick: () -> Unit
 ) {
-
     val toolBarColor = if (isSystemInDarkTheme()) Color(0xff1E293B) else Color(0xffBFDBFE)
     val titleColor = if (isSystemInDarkTheme()) Color.White else Color.Black
+    val logoutDialog = remember { mutableStateOf(false) }
 
     TopAppBar(
         title = {
@@ -660,28 +667,17 @@ fun AppToolBar(
             )
         },
         navigationIcon = {
-            IconButton(
-                onClick = {
-                    navigationIconClick.invoke()
-                }
-            ) {
+            IconButton(onClick = navigationIconClick) {
                 Icon(
                     painter = painterResource(id = R.drawable.ic_menu),
                     contentDescription = "Menu",
-                    tint = if (isSystemInDarkTheme()) Color.White else Color.Black,
+                    tint = titleColor
                 )
             }
         },
-        colors = TopAppBarDefaults.smallTopAppBarColors(
-            containerColor = toolBarColor,
-
-            ),
+        colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = toolBarColor),
         actions = {
-            IconButton(
-                onClick = {
-                    logoutButtonClick()
-                }
-            ) {
+            IconButton(onClick = { logoutDialog.value = true }) {
                 Icon(
                     imageVector = Icons.Default.Logout,
                     contentDescription = "Logout",
@@ -689,12 +685,84 @@ fun AppToolBar(
                 )
             }
         }
-
     )
+
+    if (logoutDialog.value) {
+        LogoutConfirmationDialog(
+            onDismissRequest = { logoutDialog.value = false },
+            onLogoutConfirmed = { logoutButtonClick.invoke() }
+        )
+    }
 }
 
 @Composable
-fun NavigationDrawerHeader(value: String) {
+fun LogoutConfirmationDialog(
+    onDismissRequest: () -> Unit,
+    onLogoutConfirmed: () -> Unit
+) {
+    Dialog(
+        onDismissRequest = onDismissRequest,
+        properties = DialogProperties(
+            dismissOnBackPress = true,
+            dismissOnClickOutside = false
+        )
+    ) {
+        Card(shape = RoundedCornerShape(16.dp), modifier = Modifier.padding(10.dp)) {
+            Column(
+                Modifier
+                    .background(Color.White)
+                    .wrapContentSize()
+                    .padding(10.dp),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Logout",
+                    fontSize = 19.sp,
+                    fontFamily = AppFonts.fontFamily,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = "Are you sure you want to logout? Logging out will end your current session.",
+                    fontSize = 16.sp,
+                    fontFamily = AppFonts.fontFamily,
+                    fontWeight = FontWeight.Normal,
+                    color = Color.Black
+                )
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
+                    TextButton(
+                        onClick = onDismissRequest
+                    ) {
+                        Text(
+                            text = "Cancel",
+                            color = Color.Blue,
+                            fontFamily = AppFonts.fontFamily,
+                            fontSize = 16.sp
+                        )
+                    }
+                    TextButton(
+                        onClick = {
+                            onLogoutConfirmed()
+                            onDismissRequest()
+                        }
+                    ) {
+                        Text(
+                            text = "Logout",
+                            color = Color.Red,
+                            fontFamily = AppFonts.fontFamily,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun NavigationDrawerHeader(value: String?) {
     val containerColor = if (isSystemInDarkTheme()) Color.Cyan else Color(0xff14213d)
     Box(
         modifier = Modifier
@@ -707,14 +775,16 @@ fun NavigationDrawerHeader(value: String) {
         val uiColor = if (isSystemInDarkTheme()) Color.Black else Color.White
 
         Text(
-            text = value,
+            text = value ?: "Welcome to Jetpack Compose",
             color = uiColor,
             fontFamily = AppFonts.fontFamily,
             modifier = Modifier
-                .fillMaxWidth(),
-            fontSize = 25.sp,
+                .fillMaxWidth()
+                .padding(5.dp),
+            fontSize = 24.sp,
             fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Center
+
 
         )
 

@@ -16,19 +16,45 @@ class LoginViewModel:ViewModel() {
 
     var loginProgress = mutableStateOf(false)
 
-    fun onEvent(event: LoginUiEvent){
+    var emailValidation = mutableStateOf(false)
+
+    fun onEvent(event: LoginUiEvent) {
         validateDataWithRules()
-        when(event){
+        when (event) {
             is LoginUiEvent.EmailChanged -> {
                 loginUiState.value = loginUiState.value.copy(email = event.email)
             }
+
             is LoginUiEvent.PasswordChanged -> {
                 loginUiState.value = loginUiState.value.copy(password = event.password)
             }
+
             is LoginUiEvent.LoginButtonClicked -> {
                 login()
             }
+
+            is LoginUiEvent.ForgotPasswordClicked -> {
+                resetPassword()
+            }
         }
+    }
+
+    private fun resetPassword() {
+        loginProgress.value = true
+
+        var email = loginUiState.value.email
+        FirebaseAuth.getInstance()
+            .sendPasswordResetEmail(email)
+            .addOnCompleteListener { task ->
+                loginProgress.value = false
+                if (task.isSuccessful) {
+                    AppRouter.navigateTo(Screen.SignInScreen)
+                }
+            }
+            .addOnFailureListener {
+                loginProgress.value = false
+                Log.d("Error", "resetPassword:  ${it.message}")
+            }
     }
 
     private fun validateDataWithRules() {
@@ -45,6 +71,8 @@ class LoginViewModel:ViewModel() {
         )
 
         allValidationsPassed.value = emailResult.status && passwordResult.status
+
+        emailValidation.value = emailResult.status
     }
 
     private fun login() {

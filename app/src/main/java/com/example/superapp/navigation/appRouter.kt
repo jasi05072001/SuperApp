@@ -8,13 +8,14 @@ sealed class Screen{
     object SplashScreen: Screen()
     object SignUpScreen: Screen()
     object SignInScreen: Screen()
-    object TermsAndConditionsScreen: Screen()
-    object HomeScreen: Screen()
+    object TermsAndConditionsScreen : Screen()
+    object ForgotPasswordScreen : Screen()
+    object HomeScreen : Screen()
 
 }
 
 object AppRouter{
-    var currentScreen: MutableState<Screen> = mutableStateOf(Screen.HomeScreen)
+    var currentScreen: MutableState<Screen> = mutableStateOf(Screen.SplashScreen)
 
     fun navigateTo(destination: Screen){
         currentScreen.value = destination

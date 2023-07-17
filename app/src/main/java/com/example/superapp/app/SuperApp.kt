@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.example.superapp.navigation.AppRouter
 import com.example.superapp.navigation.Screen
+import com.example.superapp.screens.ForgotPassword
 import com.example.superapp.screens.HomeScreen
 import com.example.superapp.screens.SignInScreen
 import com.example.superapp.screens.SignUpScreen
@@ -40,6 +41,7 @@ fun SuperApp() {
             val splashScreenVisible = currentScreen.value is Screen.SplashScreen
             val signUpScreenVisible = currentScreen.value is Screen.SignUpScreen
             val signInScreenVisible = currentScreen.value is Screen.SignInScreen
+            val forgotPasswordScreenVisible = currentScreen.value is Screen.ForgotPasswordScreen
             val termsScreenVisible = currentScreen.value is Screen.TermsAndConditionsScreen
             val homeScreenVisible = currentScreen.value is Screen.HomeScreen
 
@@ -72,6 +74,13 @@ fun SuperApp() {
                 exit = fadeOut() + slideOutVertically(targetOffsetY = { -it })
             ) {
                 TermsAndConditionsScreen()
+            }
+            AnimatedVisibility(
+                visible = forgotPasswordScreenVisible,
+                enter = fadeIn() + slideInVertically(initialOffsetY = { -it }),
+                exit = fadeOut() + slideOutVertically(targetOffsetY = { it })
+            ) {
+                ForgotPassword()
             }
 
             AnimatedVisibility(

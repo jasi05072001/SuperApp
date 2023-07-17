@@ -34,6 +34,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.superapp.R
 import com.example.superapp.components.AlreadyHaveAccountComponent
 import com.example.superapp.components.ButtonComponent
+import com.example.superapp.components.CheckBoxComponent
 import com.example.superapp.components.DividerTextComponent
 import com.example.superapp.components.HeadingTextComponent
 import com.example.superapp.components.LoaderComponent
@@ -136,26 +137,32 @@ private fun MainLayout(signUpViewModel: SignUpViewModel) {
             modifier = Modifier.height(25.dp)
         )
 
-//        CheckBoxComponent(
-//            onTextSelected = {
-//                AppRouter.navigateTo(Screen.TermsAndConditionsScreen)
-//            },
-//            onCheckedChange = {
-//                Log.d("TAG13", "MainLayout: $it")
-//                loginViewModel.onEvent(UiEvent.PrivacyPolicyCheckBoxClicked(it))
-//            }
-//        )
-//        Spacer(modifier = Modifier.height(15.dp))
+        CheckBoxComponent(
+            onTextSelected = {
+                AppRouter.navigateTo(Screen.TermsAndConditionsScreen)
+            },
+            onCheckedChange = {
+                Log.d("TAG13", "MainLayout: $it")
+                signUpViewModel.onEvent(SignUpUiEvent.PrivacyPolicyCheckBoxClicked(it))
+                Log.d(
+                    "TAG14",
+                    "MainLayout:${
+                        signUpViewModel.onEvent(
+                            SignUpUiEvent.PrivacyPolicyCheckBoxClicked(it)
+                        )
+                    } "
+                )
+            }
+        )
+        Spacer(modifier = Modifier.height(15.dp))
 
         ButtonComponent(
-
             value = stringResource(R.string.register),
             isEnabled = signUpViewModel.allValidationsPassed.value,
             onClick = {
                 signUpViewModel.onEvent(SignUpUiEvent.RegisterButtonClicked)
             },
-
-            )
+        )
         Spacer(
             modifier = Modifier.height(10.dp)
         )
@@ -173,14 +180,14 @@ private fun MainLayout(signUpViewModel: SignUpViewModel) {
 
         ) {
             OtherLoginOptionsComponent(
-                image = painterResource(id = R.drawable.google),
+                image = painterResource(id = R.drawable.ic_google),
                 onClick = { Log.d("TAG", "BottomSection: google") }
             )
             Spacer(
                 modifier = Modifier.width(20.dp)
             )
             OtherLoginOptionsComponent(
-                image = painterResource(id = R.drawable.facebook),
+                image = painterResource(id = R.drawable.ic_facebook),
                 onClick = { Log.d("TAG", "BottomSection: facebook") })
         }
         Spacer(

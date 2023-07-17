@@ -1,7 +1,7 @@
 package com.example.superapp.screens
 
 import android.util.Log
-import androidx.compose.animation.core.EaseInOut
+import androidx.compose.animation.core.EaseInBounce
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -69,7 +69,7 @@ fun SignInScreen(loginViewModel: LoginViewModel = viewModel()) {
         if(imeState.value){
             scrollState.animateScrollTo(
                 scrollState.value + 200,
-                animationSpec = tween(1000, easing = EaseInOut)
+                animationSpec = tween(1000, easing = EaseInBounce)
             )
         }
     }
@@ -130,7 +130,7 @@ private fun MainLayout(loginViewModel: LoginViewModel) {
         )
 
         UnderLinedClickableTextComponent(value = "Forgot Password?") {
-            Log.d("TAG", "MainLayout: Forgot Password")
+            AppRouter.navigateTo(Screen.ForgotPasswordScreen)
 
         }
 
@@ -163,14 +163,14 @@ private fun MainLayout(loginViewModel: LoginViewModel) {
 
         ) {
             OtherLoginOptionsComponent(
-                image = painterResource(id = R.drawable.google),
+                image = painterResource(id = R.drawable.ic_google),
                 onClick = { Log.d("TAG", "BottomSection: google") }
             )
             Spacer(
                 modifier = Modifier.width(20.dp)
             )
             OtherLoginOptionsComponent(
-                image = painterResource(id = R.drawable.facebook),
+                image = painterResource(id = R.drawable.ic_facebook),
                 onClick = { Log.d("TAG", "BottomSection: facebook") })
         }
         Spacer(
