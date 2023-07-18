@@ -1,7 +1,7 @@
 package com.example.superapp.screens
 
 import android.util.Log
-import androidx.compose.animation.core.EaseInBounce
+import androidx.compose.animation.core.EaseInOut
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -22,9 +22,12 @@ import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
@@ -47,7 +50,8 @@ import com.example.superapp.data.login.LoginViewModel
 import com.example.superapp.navigation.AppRouter
 import com.example.superapp.navigation.Screen
 import com.example.superapp.navigation.SystemBackButtonHandler
-import com.example.superapp.rememberImeState
+import com.example.superapp.utils.rememberImeState
+import com.example.superapp.utils.showToast
 
 @Composable
 fun SignInScreen(loginViewModel: LoginViewModel = viewModel()) {
@@ -69,7 +73,7 @@ fun SignInScreen(loginViewModel: LoginViewModel = viewModel()) {
         if(imeState.value){
             scrollState.animateScrollTo(
                 scrollState.value + 200,
-                animationSpec = tween(1000, easing = EaseInBounce)
+                animationSpec = tween(1000, easing = EaseInOut)
             )
         }
     }
@@ -81,6 +85,9 @@ fun SignInScreen(loginViewModel: LoginViewModel = viewModel()) {
 
 @Composable
 private fun MainLayout(loginViewModel: LoginViewModel) {
+
+    val loginError by loginViewModel.loginError.observeAsState()
+    val context = LocalContext.current
 
     Column(
         Modifier
@@ -191,6 +198,12 @@ private fun MainLayout(loginViewModel: LoginViewModel) {
             LoaderComponent()
         }
 
+    }
+
+    if (!loginError.isNullOrEmpty()) {
+        LaunchedEffect(loginError) {
+            showToast(context, loginError!!)
+        }
     }
 
 }

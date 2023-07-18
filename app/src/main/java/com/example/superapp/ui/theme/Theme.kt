@@ -51,9 +51,11 @@ fun SuperAppTheme(
             if (darkTheme) {
                 window.statusBarColor = Color(0xff1E293B).toArgb()
                 WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = false
+                window.navigationBarColor = Color(0xff1E293B).toArgb()
             }else {
                 window.statusBarColor = Color(0xffBFDBFE).toArgb()
                 WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = true
+                window.navigationBarColor = Color(0xffBFDBFE).toArgb()
 
             }
         }

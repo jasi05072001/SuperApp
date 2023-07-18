@@ -22,9 +22,12 @@ import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
@@ -46,7 +49,8 @@ import com.example.superapp.data.signUp.SignUpUiEvent
 import com.example.superapp.data.signUp.SignUpViewModel
 import com.example.superapp.navigation.AppRouter
 import com.example.superapp.navigation.Screen
-import com.example.superapp.rememberImeState
+import com.example.superapp.utils.rememberImeState
+import com.example.superapp.utils.showToast
 
 @Composable
 fun SignUpScreen() {
@@ -79,6 +83,8 @@ fun SignUpScreen() {
 
 @Composable
 private fun MainLayout(signUpViewModel: SignUpViewModel) {
+    val signUpError by signUpViewModel.signUpError.observeAsState()
+    val context = LocalContext.current
 
     Column(Modifier.padding(horizontal = 15.dp)) {
 
@@ -181,7 +187,9 @@ private fun MainLayout(signUpViewModel: SignUpViewModel) {
         ) {
             OtherLoginOptionsComponent(
                 image = painterResource(id = R.drawable.ic_google),
-                onClick = { Log.d("TAG", "BottomSection: google") }
+                onClick = {
+                    signUpViewModel.onEvent(SignUpUiEvent.GoogleButtonClicked)
+                }
             )
             Spacer(
                 modifier = Modifier.width(20.dp)
@@ -201,11 +209,17 @@ private fun MainLayout(signUpViewModel: SignUpViewModel) {
             ) {
             AppRouter.navigateTo(Screen.SignInScreen)
         }
-        if (signUpViewModel.signUpProgress.value){
+        if (signUpViewModel.signUpProgress.value) {
             LoaderComponent()
 
         }
 
+    }
+
+    if (!signUpError.isNullOrEmpty()) {
+        LaunchedEffect(signUpError) {
+            showToast(context, signUpError!!)
+        }
     }
 
 }

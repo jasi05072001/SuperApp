@@ -26,8 +26,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Button
@@ -61,7 +64,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
@@ -145,7 +147,6 @@ fun TextFieldComponent(
     onTextSelected: (String) -> Unit,
     imeAction: ImeAction = ImeAction.Next,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
-    placeholder: Placeholder? = null,
 ) {
 
     val uiColor = if (isSystemInDarkTheme()) Color.White else Color.Black
@@ -192,8 +193,10 @@ fun TextFieldComponent(
         keyboardActions = keyboardActions,
         keyboardOptions = KeyboardOptions(
             keyboardType = if (isEmail) KeyboardType.Email else KeyboardType.Text,
-            imeAction = imeAction
-        )
+            imeAction = imeAction,
+            autoCorrect = false,
+
+            )
     )
 
 }
@@ -645,16 +648,20 @@ fun LoaderComponent() {
 
     }
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppToolBar(
     title: String,
     logoutButtonClick: () -> Unit,
-    navigationIconClick: () -> Unit
-) {
+    navigationIconClick: () -> Unit,
+
+    ) {
     val toolBarColor = if (isSystemInDarkTheme()) Color(0xff1E293B) else Color(0xffBFDBFE)
     val titleColor = if (isSystemInDarkTheme()) Color.White else Color.Black
     val logoutDialog = remember { mutableStateOf(false) }
+    val expanded = remember { mutableStateOf(false) }
+    val dropDownMenuColor = if (isSystemInDarkTheme()) Color(0xB3000000) else Color(0xB3FFFFFF)
 
     TopAppBar(
         title = {
@@ -677,12 +684,62 @@ fun AppToolBar(
         },
         colors = TopAppBarDefaults.smallTopAppBarColors(containerColor = toolBarColor),
         actions = {
-            IconButton(onClick = { logoutDialog.value = true }) {
-                Icon(
-                    imageVector = Icons.Default.Logout,
-                    contentDescription = "Logout",
-                    tint = titleColor
-                )
+
+            Row {
+
+                IconButton(onClick = { logoutDialog.value = true }) {
+                    Icon(
+                        imageVector = Icons.Default.Logout,
+                        contentDescription = "Logout",
+                        tint = titleColor
+                    )
+                }
+                IconButton(onClick = { expanded.value = true }) {
+
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = "More",
+                        tint = titleColor
+                    )
+
+                }
+
+
+            }
+            DropdownMenu(
+                expanded = expanded.value,
+                onDismissRequest = { expanded.value = false },
+                modifier = Modifier.background(dropDownMenuColor)
+
+            ) {
+                DropdownMenuItem(onClick = { /* Handle menu item 1 click */ }) {
+                    Text(
+                        "Update Profile",
+                        color = titleColor,
+                        fontFamily = AppFonts.fontFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 16.sp
+
+                    )
+                }
+                DropdownMenuItem(onClick = { /* Handle menu item 2 click */ }) {
+                    Text(
+                        "Chat with bot",
+                        color = titleColor,
+                        fontFamily = AppFonts.fontFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 16.sp
+                    )
+                }
+                DropdownMenuItem(onClick = { /* Handle menu item 3 click */ }) {
+                    Text(
+                        "Logout",
+                        color = titleColor,
+                        fontFamily = AppFonts.fontFamily,
+                        fontWeight = FontWeight.SemiBold,
+                        fontSize = 16.sp
+                    )
+                }
             }
         }
     )

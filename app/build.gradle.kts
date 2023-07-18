@@ -72,6 +72,8 @@ dependencies {
 
     //viewModel Compose
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.1")
+    implementation("androidx.compose.runtime:runtime-livedata:1.4.3")
 
     // Navigation Compose
     implementation("androidx.navigation:navigation-compose:2.6.0")
@@ -81,9 +83,10 @@ dependencies {
 
     //firebase auth
     implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.android.gms:play-services-auth:20.6.0")
 
     //lottie
-    implementation("com.airbnb.android:lottie-compose:4.0.0")
+    implementation("com.airbnb.android:lottie-compose:6.0.0")
 
     //material 2
     implementation("androidx.compose.material:material:1.4.3")
@@ -92,8 +95,9 @@ dependencies {
     implementation("io.reactivex.rxjava3:rxkotlin:3.0.0")
     implementation("io.reactivex.rxjava3:rxjava:3.0.2")
 
-    //custom toast
-    implementation("com.github.Spikeysanju:MotionToast:1.4")
+    //firbease firestore
+    implementation("com.google.firebase:firebase-firestore-ktx")
+
 }
 kapt {
     correctErrorTypes = true

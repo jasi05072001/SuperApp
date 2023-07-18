@@ -1,4 +1,4 @@
-package com.example.superapp
+package com.example.superapp.utils
 
 import android.view.ViewTreeObserver
 import androidx.compose.runtime.Composable

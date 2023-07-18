@@ -8,5 +8,6 @@ sealed class SignUpUiEvent {
     data class PrivacyPolicyCheckBoxClicked(val status: Boolean) : SignUpUiEvent()
 
     object RegisterButtonClicked : SignUpUiEvent()
+    object GoogleButtonClicked : SignUpUiEvent()
 
 }
