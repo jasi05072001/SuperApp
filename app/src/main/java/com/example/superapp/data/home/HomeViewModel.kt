@@ -1,5 +1,6 @@
 package com.example.superapp.data.home
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -7,6 +8,8 @@ import com.example.superapp.R
 import com.example.superapp.data.NavigationItem
 import com.example.superapp.navigation.AppRouter
 import com.example.superapp.navigation.Screen
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 
 class HomeViewModel : ViewModel() {
@@ -39,9 +42,14 @@ class HomeViewModel : ViewModel() {
     val isUserLoggedIn: MutableLiveData<Boolean> = MutableLiveData()
     val emailId: MutableLiveData<String> = MutableLiveData()
 
-    fun logOut() {
+    fun logOut(context: Context) {
         val firebaseAuth = FirebaseAuth.getInstance()
+        val googleSignInClient =
+            GoogleSignIn.getClient(context, GoogleSignInOptions.DEFAULT_SIGN_IN)
         firebaseAuth.signOut()
+        googleSignInClient.signOut().addOnCompleteListener {
+            AppRouter.navigateTo(Screen.SignUpScreen)
+        }
         val authStateListener = FirebaseAuth.AuthStateListener {
             if (it.currentUser == null) {
                 AppRouter.navigateTo(Screen.SignUpScreen)

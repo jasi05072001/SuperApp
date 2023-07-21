@@ -61,7 +61,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -141,36 +140,30 @@ fun HeadingTextComponent(value:String) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TextFieldComponent(
+    value: String,
     labelValue: String,
     icon: ImageVector,
-    isEmail: Boolean = false,
-    onTextSelected: (String) -> Unit,
+    onValueChange: (String) -> Unit,
     imeAction: ImeAction = ImeAction.Next,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
 ) {
 
     val uiColor = if (isSystemInDarkTheme()) Color.White else Color.Black
 
-    val textValue = remember {
-        mutableStateOf("")
-    }
 
     OutlinedTextField(
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier
             .fillMaxWidth(),
-        value = textValue.value,
-        onValueChange = {
-            textValue.value = it
-            onTextSelected(it)
-        },
+        value = value,
+        onValueChange = onValueChange,
         singleLine = true,
         maxLines = 1,
         label = {
             Text(
                 text = labelValue,
                 color = uiColor,
-                fontFamily =AppFonts.fontFamily,
+                fontFamily = AppFonts.fontFamily,
             )
         },
         leadingIcon = {
@@ -192,7 +185,7 @@ fun TextFieldComponent(
         ),
         keyboardActions = keyboardActions,
         keyboardOptions = KeyboardOptions(
-            keyboardType = if (isEmail) KeyboardType.Email else KeyboardType.Text,
+            keyboardType = KeyboardType.Text,
             imeAction = imeAction,
             autoCorrect = false,
 
@@ -203,34 +196,31 @@ fun TextFieldComponent(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PasswordFieldComponent(labelValue :String, icon: ImageVector, onTextSelected: (String) -> Unit) {
+fun EmailFieldComponent(
+    value: String,
+    labelValue: String,
+    icon: ImageVector,
+    onValueChange: (String) -> Unit,
+    imeAction: ImeAction = ImeAction.Next,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+) {
 
     val uiColor = if (isSystemInDarkTheme()) Color.White else Color.Black
 
-    val password = remember {
-        mutableStateOf("")
-    }
-    val passwordVisible = remember {
-        mutableStateOf(false)
-    }
-    val localFocusManager = LocalFocusManager.current
 
     OutlinedTextField(
         shape = RoundedCornerShape(8.dp),
         modifier = Modifier
             .fillMaxWidth(),
-        value = password.value,
-        onValueChange = {
-            password.value = it
-            onTextSelected(it)
-        },
+        value = value,
+        onValueChange = onValueChange,
         singleLine = true,
         maxLines = 1,
         label = {
             Text(
                 text = labelValue,
                 color = uiColor,
-                fontFamily =AppFonts.fontFamily,
+                fontFamily = AppFonts.fontFamily,
             )
         },
         leadingIcon = {
@@ -250,12 +240,71 @@ fun PasswordFieldComponent(labelValue :String, icon: ImageVector, onTextSelected
             unfocusedLabelColor = MaterialTheme.colorScheme.unfocusedTextFieldText,
             cursorColor = MaterialTheme.colorScheme.focusedTextFieldText,
         ),
-        keyboardActions = KeyboardActions{
-            localFocusManager.clearFocus()
+        keyboardActions = keyboardActions,
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Email,
+            imeAction = imeAction,
+            autoCorrect = false,
+        )
+    )
+
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PasswordFieldComponent(
+    value: String,
+    labelValue: String,
+    icon: ImageVector,
+    onValueChange: (String) -> Unit,
+    imeAction: ImeAction = ImeAction.Next,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
+) {
+
+    val uiColor = if (isSystemInDarkTheme()) Color.White else Color.Black
+
+    val passwordVisible = remember {
+        mutableStateOf(false)
+    }
+
+
+    OutlinedTextField(
+        shape = RoundedCornerShape(8.dp),
+        modifier = Modifier
+            .fillMaxWidth(),
+        value = value,
+        onValueChange = onValueChange,
+        singleLine = true,
+        maxLines = 1,
+        label = {
+            Text(
+                text = labelValue,
+                color = uiColor,
+                fontFamily = AppFonts.fontFamily,
+            )
         },
+        leadingIcon = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = uiColor,
+                )
+                Spacer(modifier = Modifier.width(1.dp))
+            }
+        },
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            unfocusedBorderColor = MaterialTheme.colorScheme.unfocusedTextFieldText,
+            focusedBorderColor = MaterialTheme.colorScheme.focusedTextFieldText,
+            focusedTrailingIconColor = MaterialTheme.colorScheme.focusedTextFieldText,
+            unfocusedLabelColor = MaterialTheme.colorScheme.unfocusedTextFieldText,
+            cursorColor = MaterialTheme.colorScheme.focusedTextFieldText,
+        ),
+        keyboardActions = keyboardActions,
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Password,
-            imeAction = ImeAction.Done,
+            imeAction = imeAction,
+            autoCorrect = false,
         ),
         trailingIcon = {
 
@@ -286,15 +335,13 @@ fun PasswordFieldComponent(labelValue :String, icon: ImageVector, onTextSelected
             VisualTransformation.None
         else
             PasswordVisualTransformation()
-
     )
 
 }
-
 @Composable
 fun CheckBoxComponent(
     onTextSelected: (String) -> Unit,
-    onCheckedChange: (Boolean) -> Unit
+    onValueChange: (Boolean) -> Unit
 ) {
 
     val checkBoxState = remember {
@@ -313,8 +360,8 @@ fun CheckBoxComponent(
         Checkbox(
             checked  = checkBoxState.value,
             onCheckedChange = {
+                onValueChange(it)
                 checkBoxState.value = it
-                onCheckedChange(it)
                 Log.d("Checked", "CheckBoxComponent: $it")
             },
             colors = CheckboxDefaults.colors(
@@ -637,6 +684,7 @@ fun LoaderComponent() {
                 .background(Color.White, shape = RoundedCornerShape(8.dp)),
             contentAlignment = Alignment.Center
         ) {
+            @Suppress("DEPRECATION")
             LottieAnimation(
                 composition = composition,
                 progress = progress,
@@ -904,6 +952,8 @@ fun NavigationItemRow(item: NavigationItem, onNavigationItemClick: (NavigationIt
     }
 
 }
+
+
 
 
 

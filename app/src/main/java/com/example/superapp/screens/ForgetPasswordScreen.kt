@@ -29,6 +29,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -41,15 +42,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.superapp.R
 import com.example.superapp.components.AppFonts
 import com.example.superapp.components.ButtonComponent
+import com.example.superapp.components.EmailFieldComponent
 import com.example.superapp.components.LoaderComponent
-import com.example.superapp.components.TextFieldComponent
-import com.example.superapp.data.login.LoginUiEvent
-import com.example.superapp.data.login.LoginViewModel
 import com.example.superapp.navigation.AppRouter
 import com.example.superapp.navigation.Screen
 import com.example.superapp.navigation.SystemBackButtonHandler
+import com.example.superapp.utils.HelperFunction
 import com.example.superapp.utils.rememberImeState
 import com.example.superapp.utils.showToast
+import com.example.superapp.viewModels.LoginViewModel
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -125,9 +126,8 @@ fun ForgotPassWordView(loginViewModel: LoginViewModel) {
     val textColor = if (isSystemInDarkTheme()) Color.White else Color.Black
     val localFocusManager = LocalFocusManager.current
     val context = LocalContext.current
-    val isLoading = remember { mutableStateOf(false) }
-    val resetPasswordError by loginViewModel.resetPasswordError.observeAsState()
-
+    val resetPasswordError by loginViewModel.message.observeAsState()
+    var email by remember { mutableStateOf("") }
 
     Column(
         Modifier
@@ -151,18 +151,17 @@ fun ForgotPassWordView(loginViewModel: LoginViewModel) {
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        TextFieldComponent(
+        EmailFieldComponent(
             labelValue = "Email",
             icon = Icons.Outlined.Email,
-            onTextSelected = {
-                loginViewModel.onEvent(LoginUiEvent.EmailChanged(it))
-
-            },
-            isEmail = true,
             imeAction = ImeAction.Done,
             keyboardActions = KeyboardActions {
                 localFocusManager.clearFocus()
-            }
+            },
+            onValueChange = {
+                email = it
+            },
+            value = email
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -170,21 +169,20 @@ fun ForgotPassWordView(loginViewModel: LoginViewModel) {
         ButtonComponent(
             value = "Continue",
             onClick = {
-                isLoading.value = true
-                loginViewModel.onEvent(LoginUiEvent.ForgotPasswordClicked)
+                loginViewModel.resetPasswordLink(email)
             },
-            isEnabled = loginViewModel.emailValidation.value
+            isEnabled = HelperFunction.isValidEmail(email),
         )
 
         Spacer(modifier = Modifier.height(20.dp))
 
 
     }
-    if (isLoading.value) {
+    if (loginViewModel.isLoading.value) {
         LoaderComponent()
     }
     if (!resetPasswordError.isNullOrEmpty()) {
-        isLoading.value = false
+        loginViewModel.isLoading.value = false
         LaunchedEffect(resetPasswordError) {
             showToast(context, resetPasswordError!!)
         }

@@ -24,12 +24,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -38,20 +42,27 @@ import com.example.superapp.R
 import com.example.superapp.components.AlreadyHaveAccountComponent
 import com.example.superapp.components.ButtonComponent
 import com.example.superapp.components.DividerTextComponent
+import com.example.superapp.components.EmailFieldComponent
 import com.example.superapp.components.HeadingTextComponent
 import com.example.superapp.components.LoaderComponent
 import com.example.superapp.components.NormalTextComponent
 import com.example.superapp.components.OtherLoginOptionsComponent
 import com.example.superapp.components.PasswordFieldComponent
-import com.example.superapp.components.TextFieldComponent
 import com.example.superapp.components.UnderLinedClickableTextComponent
-import com.example.superapp.data.login.LoginUiEvent
-import com.example.superapp.data.login.LoginViewModel
+import com.example.superapp.data.UserInfo
+import com.example.superapp.data.google.rememberFirebaseAuthLauncher
 import com.example.superapp.navigation.AppRouter
 import com.example.superapp.navigation.Screen
 import com.example.superapp.navigation.SystemBackButtonHandler
+import com.example.superapp.utils.HelperFunction
 import com.example.superapp.utils.rememberImeState
 import com.example.superapp.utils.showToast
+import com.example.superapp.viewModels.LoginViewModel
+import com.example.superapp.viewModels.SignUpViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 @Composable
 fun SignInScreen(loginViewModel: LoginViewModel = viewModel()) {
@@ -86,8 +97,49 @@ fun SignInScreen(loginViewModel: LoginViewModel = viewModel()) {
 @Composable
 private fun MainLayout(loginViewModel: LoginViewModel) {
 
-    val loginError by loginViewModel.loginError.observeAsState()
+    val loginError by loginViewModel.message.observeAsState()
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     val context = LocalContext.current
+    val signUpViewModel: SignUpViewModel = viewModel()
+
+    val isLoading = remember {
+        mutableStateOf(false)
+    }
+    val token = stringResource(R.string.default_web_client_id)
+
+    val gso = remember {
+        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(token)
+            .requestEmail()
+            .build()
+    }
+    val googleSignInClient = remember {
+        GoogleSignIn.getClient(context, gso)
+    }
+
+    var user by remember { mutableStateOf(Firebase.auth.currentUser) }
+    val launcher = rememberFirebaseAuthLauncher(
+        onAuthComplete = { result ->
+            user = result.user
+            val info = UserInfo(
+                name = user!!.displayName,
+                email = user!!.email,
+                imgUrl = user!!.photoUrl.toString(),
+                uid = user!!.uid
+            )
+            signUpViewModel.saveUserInfo(info)
+            isLoading.value = false
+            AppRouter.navigateTo(Screen.HomeScreen)
+
+        },
+        onAuthError = {
+            user = null
+            isLoading.value = false
+            showToast(context, "Sign in failed")
+        }
+    )
+
 
     Column(
         Modifier
@@ -109,27 +161,27 @@ private fun MainLayout(loginViewModel: LoginViewModel) {
         )
         Spacer(modifier = Modifier.height(10.dp))
 
-
-        TextFieldComponent(
-            labelValue = stringResource(id = R.string.email),
+        EmailFieldComponent(
+            labelValue = "Email",
             icon = Icons.Outlined.Email,
-            isEmail = true,
-            onTextSelected = {
-                loginViewModel.onEvent(LoginUiEvent.EmailChanged(it))
-            }
-        )
+            imeAction = ImeAction.Next,
+            onValueChange = {
+                email = it
+            },
+            value = email,
 
+            )
         Spacer(
             modifier = Modifier.height(5.dp)
         )
-
-
         PasswordFieldComponent(
             labelValue = stringResource(id = R.string.password),
             icon = Icons.Outlined.Lock,
-            onTextSelected = {
-                loginViewModel.onEvent(LoginUiEvent.PasswordChanged(it))
-            }
+            imeAction = ImeAction.Done,
+            onValueChange = {
+                password = it
+            },
+            value = password,
         )
 
         Spacer(
@@ -148,10 +200,14 @@ private fun MainLayout(loginViewModel: LoginViewModel) {
         ButtonComponent(
             value = stringResource(R.string.login),
             onClick = {
-                loginViewModel.onEvent(LoginUiEvent.LoginButtonClicked)
+                isLoading.value = true
+                loginViewModel.login(email, password)
+                isLoading.value = false
 
             },
-            isEnabled = loginViewModel.allValidationsPassed.value
+            isEnabled = HelperFunction.isValidEmail(email) && HelperFunction.isValidPassword(
+                password
+            )
         )
         Spacer(
             modifier = Modifier.height(20.dp)
@@ -171,7 +227,10 @@ private fun MainLayout(loginViewModel: LoginViewModel) {
         ) {
             OtherLoginOptionsComponent(
                 image = painterResource(id = R.drawable.ic_google),
-                onClick = { Log.d("TAG", "BottomSection: google") }
+                onClick = {
+                    isLoading.value = true
+                    launcher.launch(googleSignInClient.signInIntent)
+                }
             )
             Spacer(
                 modifier = Modifier.width(20.dp)
@@ -194,9 +253,6 @@ private fun MainLayout(loginViewModel: LoginViewModel) {
         Spacer(
             modifier = Modifier.height(10.dp)
         )
-        if (loginViewModel.loginProgress.value) {
-            LoaderComponent()
-        }
 
     }
 
@@ -205,6 +261,10 @@ private fun MainLayout(loginViewModel: LoginViewModel) {
             showToast(context, loginError!!)
         }
     }
+    if (loginViewModel.isLoading.value || isLoading.value) {
+        LoaderComponent()
+    }
+
 
 }
 

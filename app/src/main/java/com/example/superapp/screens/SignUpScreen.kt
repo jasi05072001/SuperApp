@@ -24,12 +24,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -39,18 +43,25 @@ import com.example.superapp.components.AlreadyHaveAccountComponent
 import com.example.superapp.components.ButtonComponent
 import com.example.superapp.components.CheckBoxComponent
 import com.example.superapp.components.DividerTextComponent
+import com.example.superapp.components.EmailFieldComponent
 import com.example.superapp.components.HeadingTextComponent
 import com.example.superapp.components.LoaderComponent
 import com.example.superapp.components.NormalTextComponent
 import com.example.superapp.components.OtherLoginOptionsComponent
 import com.example.superapp.components.PasswordFieldComponent
 import com.example.superapp.components.TextFieldComponent
-import com.example.superapp.data.signUp.SignUpUiEvent
-import com.example.superapp.data.signUp.SignUpViewModel
+import com.example.superapp.data.UserInfo
+import com.example.superapp.data.google.rememberFirebaseAuthLauncher
 import com.example.superapp.navigation.AppRouter
 import com.example.superapp.navigation.Screen
+import com.example.superapp.utils.HelperFunction
 import com.example.superapp.utils.rememberImeState
 import com.example.superapp.utils.showToast
+import com.example.superapp.viewModels.SignUpViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 @Composable
 fun SignUpScreen() {
@@ -59,6 +70,7 @@ fun SignUpScreen() {
     val scrollState = rememberScrollState()
     val  uiColor = if (isSystemInDarkTheme())Color(0xff1E293B) else Color(0xffBFDBFE)
     val signUpViewModel = viewModel<SignUpViewModel>()
+
 
     Surface(color = uiColor) {
         Column(
@@ -79,12 +91,58 @@ fun SignUpScreen() {
             )
         }
     }
+
 }
+
 
 @Composable
 private fun MainLayout(signUpViewModel: SignUpViewModel) {
-    val signUpError by signUpViewModel.signUpError.observeAsState()
+    val signUpError by signUpViewModel.message.observeAsState()
     val context = LocalContext.current
+
+    var email by remember { mutableStateOf("") }
+
+    var password by remember { mutableStateOf("") }
+
+    var name by remember { mutableStateOf("") }
+
+    var isTermsChecked by remember { mutableStateOf(false) }
+
+    val isLoading = remember {
+        mutableStateOf(false)
+    }
+    val token = stringResource(R.string.default_web_client_id)
+    val gso = remember {
+        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(token)
+            .requestEmail()
+            .build()
+    }
+    val googleSignInClient = remember {
+        GoogleSignIn.getClient(context, gso)
+    }
+
+    var user by remember { mutableStateOf(Firebase.auth.currentUser) }
+    val launcher = rememberFirebaseAuthLauncher(
+        onAuthComplete = { result ->
+            user = result.user
+            val info = UserInfo(
+                name = user!!.displayName,
+                email = user!!.email,
+                imgUrl = user!!.photoUrl.toString(),
+                uid = user!!.uid
+            )
+            signUpViewModel.saveUserInfo(info)
+            isLoading.value = false
+            AppRouter.navigateTo(Screen.HomeScreen)
+
+        },
+        onAuthError = {
+            user = null
+            isLoading.value = false
+            showToast(context, "Sign in failed")
+        }
+    )
 
     Column(Modifier.padding(horizontal = 15.dp)) {
 
@@ -105,11 +163,11 @@ private fun MainLayout(signUpViewModel: SignUpViewModel) {
 
 
         TextFieldComponent(
-            labelValue = stringResource(id = R.string.name),
+            value = name,
+            labelValue = "Name",
             icon = Icons.Outlined.PersonOutline,
-            onTextSelected = {
-                signUpViewModel.onEvent(SignUpUiEvent.NameChanged(it))
-
+            onValueChange = {
+                name = it
             }
         )
 
@@ -117,15 +175,16 @@ private fun MainLayout(signUpViewModel: SignUpViewModel) {
             modifier = Modifier.height(5.dp)
         )
 
-        TextFieldComponent(
-            labelValue = stringResource(id = R.string.email),
+        EmailFieldComponent(
+            labelValue = "Email",
             icon = Icons.Outlined.Email,
-            isEmail = true,
-            onTextSelected = {
-                signUpViewModel.onEvent(SignUpUiEvent.EmailChanged(it))
+            imeAction = ImeAction.Next,
+            onValueChange = {
+                email = it
+            },
+            value = email,
 
-            }
-        )
+            )
 
         Spacer(
             modifier = Modifier.height(5.dp)
@@ -134,10 +193,13 @@ private fun MainLayout(signUpViewModel: SignUpViewModel) {
         PasswordFieldComponent(
             labelValue = stringResource(id = R.string.password),
             icon = Icons.Outlined.Lock,
-            onTextSelected = {
-                signUpViewModel.onEvent(SignUpUiEvent.PasswordChanged(it))
-            }
-        )
+            imeAction = ImeAction.Done,
+            onValueChange = {
+                password = it
+            },
+            value = password,
+
+            )
 
         Spacer(
             modifier = Modifier.height(25.dp)
@@ -147,27 +209,32 @@ private fun MainLayout(signUpViewModel: SignUpViewModel) {
             onTextSelected = {
                 AppRouter.navigateTo(Screen.TermsAndConditionsScreen)
             },
-            onCheckedChange = {
-                Log.d("TAG13", "MainLayout: $it")
-                signUpViewModel.onEvent(SignUpUiEvent.PrivacyPolicyCheckBoxClicked(it))
-                Log.d(
-                    "TAG14",
-                    "MainLayout:${
-                        signUpViewModel.onEvent(
-                            SignUpUiEvent.PrivacyPolicyCheckBoxClicked(it)
-                        )
-                    } "
-                )
-            }
+            onValueChange = {
+                isTermsChecked = it
+            },
         )
         Spacer(modifier = Modifier.height(15.dp))
 
         ButtonComponent(
             value = stringResource(R.string.register),
-            isEnabled = signUpViewModel.allValidationsPassed.value,
             onClick = {
-                signUpViewModel.onEvent(SignUpUiEvent.RegisterButtonClicked)
+                isLoading.value = true
+                signUpViewModel.register(
+                    name = name,
+                    email = email,
+                    password = password,
+                    context = context
+                )
+                isLoading.value = false
             },
+            isEnabled = HelperFunction.isValidEmail(email)
+                    &&
+                    HelperFunction.isValidPassword(password)
+                    &&
+                    HelperFunction.isNameValid(name)
+                    &&
+                    HelperFunction.isCheckBoxChecked(isTermsChecked)
+
         )
         Spacer(
             modifier = Modifier.height(10.dp)
@@ -188,7 +255,9 @@ private fun MainLayout(signUpViewModel: SignUpViewModel) {
             OtherLoginOptionsComponent(
                 image = painterResource(id = R.drawable.ic_google),
                 onClick = {
-                    signUpViewModel.onEvent(SignUpUiEvent.GoogleButtonClicked)
+                    isLoading.value = true
+                    launcher.launch(googleSignInClient.signInIntent)
+
                 }
             )
             Spacer(
@@ -209,11 +278,14 @@ private fun MainLayout(signUpViewModel: SignUpViewModel) {
             ) {
             AppRouter.navigateTo(Screen.SignInScreen)
         }
-        if (signUpViewModel.signUpProgress.value) {
+        if (signUpViewModel.isLoading.value) {
             LoaderComponent()
 
         }
+    }
 
+    if (isLoading.value) {
+        LoaderComponent()
     }
 
     if (!signUpError.isNullOrEmpty()) {
@@ -222,7 +294,11 @@ private fun MainLayout(signUpViewModel: SignUpViewModel) {
         }
     }
 
+    LaunchedEffect(isLoading.value) {
+        isLoading.value = isLoading.value
+    }
 }
+
 
 @Preview(device = Devices.PIXEL_XL)
 @Composable

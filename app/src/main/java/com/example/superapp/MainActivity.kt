@@ -22,79 +22,12 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     SuperApp()
-//                    Greeting()
                 }
             }
         }
     }
 }
 
-//@OptIn(ExperimentalMaterial3Api::class)
-//@Composable
-//fun Greeting(restPass: RestPass = viewModel()) {
-//    val email = remember { mutableStateOf("") }
-//    val context = LocalContext.current
-//
-//    val resetPasswordError by restPass.resetPasswordError.observeAsState()
-//    val isLoading = remember { mutableStateOf(false) }
-//
-//    Column {
-//        TextField(
-//            value = email.value,
-//            onValueChange = { email.value = it },
-//            label = { Text("Email") },
-//            leadingIcon = {
-//                Icons.Default.Email
-//            },
-//            modifier = Modifier.wrapContentSize()
-//        )
-//        Button(
-//            onClick = {
-//                isLoading.value = true
-//                restPass.resetPassword(email.value)
-//            },
-//            modifier = Modifier.padding(vertical = 16.dp)
-//        ) {
-//            Text("Reset Password")
-//        }
-//
-//        if (isLoading.value) {
-//            LinearProgressIndicator(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(bottom = 8.dp)
-//            )
-//        }
-//
-//        if (!resetPasswordError.isNullOrEmpty()) {
-//            isLoading.value = false
-//            LaunchedEffect(resetPasswordError) {
-//                showToast(context, resetPasswordError!!)
-//            }
-//        }
-//    }
-//}
-
-//class RestPass() : ViewModel() {
-//
-//    private val _resetPasswordError = MutableLiveData<String>()
-//    val resetPasswordError: LiveData<String> get() = _resetPasswordError
-//
-//
-//    fun resetPassword(email: String) {
-//
-//
-//        FirebaseAuth.getInstance()
-//            .sendPasswordResetEmail(email)
-//            .addOnCompleteListener { task ->
-//                _resetPasswordError.value = "Email sent."
-//            }
-//            .addOnFailureListener { exception ->
-//                _resetPasswordError.value = exception.message
-//                Log.d("Error", "resetPassword: ${exception.message}")
-//            }
-//    }
-//}
 
 
 @Preview(showBackground = true)
@@ -104,3 +37,4 @@ fun GreetingPreview() {
 
     }
 }
+

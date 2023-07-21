@@ -15,6 +15,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.superapp.components.AppToolBar
@@ -30,6 +31,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
     val uiColor = if (isSystemInDarkTheme()) Color.Cyan else Color(0xff1E293B)
     val drawerColor = if (isSystemInDarkTheme()) Color(0xff1E293B) else Color(0xffBFDBFE)
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     homeViewModel.getUserData()
 
@@ -39,7 +41,7 @@ fun HomeScreen(homeViewModel: HomeViewModel = viewModel()) {
             AppToolBar(
                 title = "Home",
                 logoutButtonClick = {
-                    homeViewModel.logOut()
+                    homeViewModel.logOut(context)
                 },
                 navigationIconClick = {
                     coroutineScope.launch {

@@ -98,6 +98,7 @@ dependencies {
     //firbease firestore
     implementation("com.google.firebase:firebase-firestore-ktx")
 
+
 }
 kapt {
     correctErrorTypes = true
