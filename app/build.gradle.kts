@@ -98,6 +98,8 @@ dependencies {
     //firbease firestore
     implementation("com.google.firebase:firebase-firestore-ktx")
 
+    //coil compose
+    implementation("io.coil-kt:coil-compose:2.4.0")
 
 }
 kapt {

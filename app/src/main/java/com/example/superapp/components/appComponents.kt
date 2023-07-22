@@ -911,20 +911,28 @@ fun NavigationDrawerBody(
 
     LazyColumn(modifier = Modifier.fillMaxWidth()) {
         items(navigationDrawerItems) {
-            NavigationItemRow(item = it, onNavigationItemClick = { item ->
-                onNavigationItemClick.invoke(item)
-            })
-            Divider(
-                color = dividerColor, thickness = 1.dp,
-                modifier = Modifier.padding(horizontal = 10.dp)
+            NavigationItemRow(
+                item = it,
+                onNavigationItemClick = { item ->
+                    onNavigationItemClick.invoke(item)
+                }
             )
-
+            Divider(
+                color = dividerColor,
+                thickness = 1.dp,
+                modifier = Modifier.padding(
+                    horizontal = 10.dp
+                )
+            )
         }
     }
 }
 
 @Composable
-fun NavigationItemRow(item: NavigationItem, onNavigationItemClick: (NavigationItem) -> Unit) {
+fun NavigationItemRow(
+    item: NavigationItem,
+    onNavigationItemClick: (NavigationItem) -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
